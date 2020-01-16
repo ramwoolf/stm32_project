@@ -1,10 +1,23 @@
 #include "stm32f4xx.h"
 
-int main(void) {
-    
-    uint32_t i = 0u;
+uint16_t delay_count = 0u;
+
+void SysTick_Handler(void) {
+    if (delay_count > 0u) {
+        --delay_count;
+    }
+}
+
+void delay_ms(uint16_t delay_value_ms) {
+    delay_count = delay_value_ms;
+    while (delay_count) {}
+}
+
+int main(void) { 
     GPIO_InitTypeDef GPIO_Init_LED;
     RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD, ENABLE);
+
+    SysTick_Config(SystemCoreClock/1000);
 
     GPIO_Init_LED.GPIO_Pin = GPIO_Pin_12|GPIO_Pin_13|GPIO_Pin_14|GPIO_Pin_15;
     GPIO_Init_LED.GPIO_Mode = GPIO_Mode_OUT;
@@ -16,8 +29,8 @@ int main(void) {
 
     while (1) {
         GPIO_SetBits(GPIOD, GPIO_Pin_12|GPIO_Pin_13|GPIO_Pin_14|GPIO_Pin_15);
-        for (i = 0u; i < 2000000; ++i){}
+        delay_ms(500u);
         GPIO_ResetBits(GPIOD, GPIO_Pin_12|GPIO_Pin_13|GPIO_Pin_14|GPIO_Pin_15);
-        for (i = 0u; i < 2000000; ++i){}
+        delay_ms(500u);
     }
 }
