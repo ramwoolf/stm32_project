@@ -12,6 +12,8 @@
 #define RED_MODE 2u
 #define BLUE_MODE 3u
 
+#define USER_BUTTON_READ GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_0)
+
 #define DELAY 250u
 
 #include "stm32f4xx.h"
@@ -32,6 +34,7 @@ void delay_ms(uint16_t delay_value_ms) {
 
 void Timer_init() {
     RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD, ENABLE);
+    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
     SysTick_Config(SystemCoreClock/1000);
     return;
 }
@@ -49,13 +52,26 @@ void LEDs_init() {
     return;
 }
 
-// void Set_mode()
+void user_button_init() {
+    GPIO_InitTypeDef GPIO_Init_UserButton;
+    
+    GPIO_Init_UserButton.GPIO_Pin = GPIO_Pin_0;
+    GPIO_Init_UserButton.GPIO_Mode = GPIO_Mode_IN;
+    GPIO_Init_UserButton.GPIO_Speed = GPIO_Speed_2MHz;
+    GPIO_Init_UserButton.GPIO_OType = GPIO_OType_PP;
+    GPIO_Init_UserButton.GPIO_PuPd = GPIO_PuPd_NOPULL;
+
+    GPIO_Init(GPIOA, &GPIO_Init_UserButton);
+}
 
 int main(void) { 
     Timer_init();
     LEDs_init();
 
     while (1) {
+        if (USER_BUTTON_READ == 1) {
+            mode = 3u;
+        }
         switch (mode) {
             case GREEN_MODE:
                 LED_GREEN_ON();
