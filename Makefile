@@ -34,6 +34,7 @@ SRCS  += system_stm32f4xx.c
 # make finds them by searching the vpath defined above.
 SRCS  += stm32f4xx_rcc.c 
 SRCS  += stm32f4xx_gpio.c
+SRCS  += stm32f4xx_usart.c
 
 # Startup file written by ST
 # The assembly code in this file is the first one to be
