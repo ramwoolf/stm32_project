@@ -18,6 +18,8 @@
 
 #include "stm32f4xx.h"
 
+#include <stdio.h>
+
 uint16_t delay_count = 0u;
 uint8_t mode = 0u;
 
@@ -92,16 +94,24 @@ void USART_ini() {
     USART_Cmd(USART2, ENABLE);
 }
 
+void SendText(char const* str_p) {
+    uint8_t i = 0u;
+    while (str_p[i] != '\0') {
+        while (USART_GetFlagStatus(USART2, USART_FLAG_TC) == RESET) {}
+        USART_SendData(USART2, str_p[i]);
+        ++i;
+    }
+}
+
 int main(void) { 
     Timer_init();
     USART_ini();
     // LEDs_init();
-    uint16_t data = 0x00;
+    char str[30];
+    sprintf(str, "Hello world");
 
     while(1) {
         delay_ms(500);
-        USART_SendData(USART2, data % 256);
-        ++data;
-        ++data;
+        SendText(str);
     }
 }
