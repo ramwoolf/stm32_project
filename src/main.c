@@ -108,7 +108,7 @@ int main(void) {
     USART_ini();
     // LEDs_init();
     char str[30];
-    sprintf(str, "Hello world");
+    sprintf(str, "Hello world\n\r");
 
     while(1) {
         delay_ms(500);
