@@ -23,6 +23,9 @@
 uint16_t delay_count = 0u;
 uint8_t mode = 0u;
 
+char buf[100];
+uint8_t sendCount = 0u;
+
 void SysTick_Handler(void) {
     if (delay_count > 0u) {
         --delay_count;
@@ -91,7 +94,30 @@ void USART_ini() {
     USART_InitUser.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
 
     USART_Init(USART2, &USART_InitUser);
+    NVIC_EnableIRQ(USART2_IRQn);
     USART_Cmd(USART2, ENABLE);
+}
+
+void USART2_IRQHandler(void) {
+    if (USART_GetItStatus(USART2, USART_IT_TXE) == SET) {
+        USART_ClearITPendingBit(USART2, USART_IT_TXE);
+
+        if (buf[sendCount] != 0) {
+            USART_SendData(USART2, buf[sendCount]);
+            ++sendCount;
+        }
+        else {
+            sendCount = 0u;
+            USART_ITConfig(USART2, USART_IT_TXE, DISABLE);
+        }
+        
+    }
+}
+
+void SendToPCWithInt() {
+    USART_SendData(USART2, buf[sendCount]);
+    ++sendCount;
+    USART_ITConfig(USART2, USART_IT_TXE, ENABLE);
 }
 
 void SendText(char const* str_p) {
@@ -106,12 +132,10 @@ void SendText(char const* str_p) {
 int main(void) { 
     Timer_init();
     USART_ini();
-    // LEDs_init();
-    char str[30];
-    sprintf(str, "Hello world\n\r");
+    sprintf(buf, "Hello world\n\r");
 
     while(1) {
         delay_ms(500);
-        SendText(str);
+        SendToPCWithInt();
     }
 }
